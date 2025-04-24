@@ -1,4 +1,4 @@
-RFGNMapPostBuilder - Red Faction Game Night Map Pack Post Generator
+Red Faction Game Night Map Pack Post Generator
 ------
 
 Usage:
