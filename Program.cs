@@ -16,17 +16,17 @@ namespace RFGNMapPostBuilder
 			string inputFile = null;
 			string gametype = null;
 			string gnNumber = null;
-            bool legacyServerListFormat = false;
+			bool legacyServerListFormat = false;
 
-            for (int i = 0; i < args.Length - 1; i++)
+			for (int i = 0; i < args.Length - 1; i++)
 			{
 				switch (args[i])
 				{
 					case "-input": inputFile = args[i + 1]; break;
 					case "-gametype": gametype = args[i + 1]; break;
 					case "-gn": gnNumber = args[i + 1]; break;
-                    case "-legacy": legacyServerListFormat = true; break;
-                }
+					case "-legacy": legacyServerListFormat = true; break;
+				}
 			}
 
 			if (inputFile == null || !File.Exists(inputFile) || gametype == null || gnNumber == null)
@@ -83,28 +83,28 @@ namespace RFGNMapPostBuilder
 
 			// Write serverlist.txt
 			var serverListOutput = new StringBuilder();
-            bool firstLevelRulesAdded = false;
-            foreach (var rawMapName in mapNames)
+			bool firstLevelRulesAdded = false;
+			foreach (var rawMapName in mapNames)
 			{
 				string mapName = rawMapName.Trim();
-                if (string.IsNullOrWhiteSpace(mapName))
-                    continue;
+				if (string.IsNullOrWhiteSpace(mapName))
+					continue;
 
-                if (legacyServerListFormat)
-                {
-                    serverListOutput.AppendLine($"$Map: \"{mapName}\"");
-                }
-                else
-                {
-                    serverListOutput.AppendLine("[[levels]]");
-                    serverListOutput.AppendLine($"filename = \"{mapName}\"");
-                    if (!firstLevelRulesAdded)
-                    {
-                        serverListOutput.AppendLine("[levels.rules]");
-                        serverListOutput.AppendLine("time_limit = 660"); // set first map to 11mins
-                        firstLevelRulesAdded = true;
-                    }
-                }
+				if (legacyServerListFormat)
+				{
+					serverListOutput.AppendLine($"$Map: \"{mapName}\"");
+				}
+				else
+				{
+					serverListOutput.AppendLine("[[levels]]");
+					serverListOutput.AppendLine($"filename = \"{mapName}\"");
+					if (!firstLevelRulesAdded)
+					{
+						serverListOutput.AppendLine("[levels.rules]");
+						serverListOutput.AppendLine("time_limit = 660"); // set first map to 11mins
+						firstLevelRulesAdded = true;
+					}
+				}
 			}
 
 			File.WriteAllText("serverlist.txt", serverListOutput.ToString());
