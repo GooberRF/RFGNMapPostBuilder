@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Web;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace RFGNMapPostBuilder
 {
@@ -11,7 +12,20 @@ namespace RFGNMapPostBuilder
 	{
 		private static readonly string baseUrl = "https://autodl.factionfiles.com/findmap.php?rflName=";
 
-		static async Task Main(string[] args)
+        private static readonly Dictionary<string, string> LevelPrefixToGameType =
+			new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                        { "dm", "DM" },
+                        { "pdm", "DM" },
+                        { "ctf", "CTF" },
+                        { "pctf", "CTF" },
+                        { "koth", "KOTH" },
+                        { "esc", "ESC" },
+                        { "rev", "REV" },
+                        { "dc", "DC" }
+                };
+
+        static async Task Main(string[] args)
 		{
 			string inputFile = null;
 			string gametype = null;
@@ -90,25 +104,37 @@ namespace RFGNMapPostBuilder
 				if (string.IsNullOrWhiteSpace(mapName))
 					continue;
 
-				if (legacyServerListFormat)
-				{
-					serverListOutput.AppendLine($"$Map: \"{mapName}\"");
-				}
-				else
-				{
-					serverListOutput.AppendLine("[[levels]]");
-					serverListOutput.AppendLine($"filename = \"{mapName}\"");
-					if (!firstLevelRulesAdded)
-					{
-						serverListOutput.AppendLine("[levels.rules]");
-						serverListOutput.AppendLine("time_limit = 660"); // set first map to 11mins
-						firstLevelRulesAdded = true;
-					}
-				}
-			}
+                if (legacyServerListFormat)
+                {
+                    serverListOutput.AppendLine($"$Map: \"{mapName}\"");
+                }
+                else
+                {
+                    serverListOutput.AppendLine("[[levels]]");
+                    serverListOutput.AppendLine($"filename = \"{mapName}\"");
+                    string levelGameType = GetLevelGameType(mapName, gametype);
+                    serverListOutput.AppendLine("[levels.rules]");
+                    serverListOutput.AppendLine($"game_type = \"{levelGameType}\"");
+                    if (!firstLevelRulesAdded)
+                    {
+                        serverListOutput.AppendLine("time_limit = 660"); // set first map to 11mins
+                        firstLevelRulesAdded = true;
+                    }
+                }
+            }
 
 			File.WriteAllText("serverlist.txt", serverListOutput.ToString());
 			Console.WriteLine("Serverlist saved to: serverlist.txt");
 		}
+		private static string GetLevelGameType(string mapName, string defaultGameType)
+		{
+			foreach (var mapping in LevelPrefixToGameType)
+			{
+				if (mapName.StartsWith(mapping.Key, StringComparison.OrdinalIgnoreCase))
+					return mapping.Value;
+			}
+            Console.WriteLine($"No game type mapping found for level '{mapName}'. Using provided game type '{defaultGameType}'.");
+            return defaultGameType;
+        }
 	}
 }
