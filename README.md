@@ -3,23 +3,25 @@ Red Faction Game Night Map Pack Post Generator
 
 Usage:
 ------
-- RFGNMapPostBuilder.exe -input <maplist.txt> -gametype <DM|CTF|TDM|KOTH|DC> -gn <event number>
+- RFGNMapPostBuilder.exe -input <maplist.txt> -gn <event number> [-gametype <default type>] [-legacy]
 
 Example:
 ------
-- RFGNMapPostBuilder.exe -input maps.txt -gametype DM -gn 157
+- RFGNMapPostBuilder.exe -input maps.txt -gn 157 -gametype DM
 
 Arguments:
 ------
 - `-input`     Path to text file with .rfl map filenames, one per line
-- `-gametype`  Game type abbreviation
 - `-gn`        RFGN number
+- `-gametype`  Default game type when no prefix is recognized (default: DM)
 - `-legacy`    Toggle legacy dedicated_server.txt format (default: false)
 
 Output:
 ------
-- Generates a formatted post text file: GameNight<GN>_<GAMETYPE>.txt
+- Generates a formatted post text file: GameNight<GN>.txt
 - Generates a formatted dedicated server config levels section: serverlist.txt
+
+Game types are automatically determined from map filename prefixes when possible. Levels without a recognized prefix use the configured default game type (DM if unspecified).
 
 Notes:
 ------

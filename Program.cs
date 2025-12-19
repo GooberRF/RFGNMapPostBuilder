@@ -27,8 +27,8 @@ namespace RFGNMapPostBuilder
 
         static async Task Main(string[] args)
         {
+            string defaultGameType = "DM";
             string inputFile = null;
-            string gametype = null;
             string gnNumber = null;
             bool legacyServerListFormat = false;
 
@@ -37,22 +37,22 @@ namespace RFGNMapPostBuilder
                 switch (args[i])
                 {
                     case "-input": inputFile = args[i + 1]; break;
-                    case "-gametype": gametype = args[i + 1]; break;
                     case "-gn": gnNumber = args[i + 1]; break;
+                    case "-gametype": defaultGameType = args[i + 1]; break;
                     case "-legacy": legacyServerListFormat = true; break;
                 }
             }
 
-            if (inputFile == null || !File.Exists(inputFile) || gametype == null || gnNumber == null)
+            if (inputFile == null || !File.Exists(inputFile) || gnNumber == null)
             {
-                Console.WriteLine("Usage: RFGNMapPostBuilder.exe -input maplist.txt -gametype DM -gn 157 [-legacy]");
+                Console.WriteLine("Usage: RFGNMapPostBuilder.exe -input maplist.txt -gn 157 [-gametype DM] [-legacy]");
                 return;
             }
 
-            // Write GameNight#_X.txt
+            // Write GameNight#.txt
             var mapNames = File.ReadAllLines(inputFile);
             var output = new StringBuilder();
-            output.AppendLine($"[b]Map pack for Red Faction Game Night {gnNumber} ({gametype})[/b]\n");
+            output.AppendLine($"[b]Map pack for Red Faction Game Night {gnNumber}[/b]\n");
             output.AppendLine("[i]For more information and to participate in Red Faction Game Night events, join the Red Faction community on Discord: [url=https://discord.gg/factionfiles][FactionFiles Discord][/url][/i]\n");
             output.AppendLine("This game night event featured the following maps, of which all customs are included in this pack:");
 
@@ -79,8 +79,9 @@ namespace RFGNMapPostBuilder
                         string name = lines[1];
                         string author = lines[2];
                         string id = lines[5];
+                        string levelGameType = GetLevelGameType(mapName, defaultGameType);
 
-                        output.AppendLine($"[url=https://www.factionfiles.com/ff.php?action=file&id={id}]{name}[/url] by {author}");
+                        output.AppendLine($"{levelGameType} - [url=https://www.factionfiles.com/ff.php?action=file&id={id}]{name}[/url] by {author}");
                     }
                     catch (Exception ex)
                     {
@@ -91,7 +92,7 @@ namespace RFGNMapPostBuilder
 
             output.AppendLine("\nWe hope you enjoy Game Night! After you play them, try to remember to stop back and leave reviews for the maps listed above. Your feedback could be really valuable to the featured creators!");
 
-            string outputFile = $"GameNight{gnNumber}_{gametype}.txt";
+            string outputFile = $"GameNight{gnNumber}.txt";
             File.WriteAllText(outputFile, output.ToString());
             Console.WriteLine($"Map pack post saved to: {outputFile}");
 
@@ -112,7 +113,7 @@ namespace RFGNMapPostBuilder
                 {
                     serverListOutput.AppendLine("[[levels]]");
                     serverListOutput.AppendLine($"filename = \"{mapName}\"");
-                    string levelGameType = GetLevelGameType(mapName, gametype);
+                    string levelGameType = GetLevelGameType(mapName, defaultGameType);
                     serverListOutput.AppendLine("[levels.rules]");
                     serverListOutput.AppendLine($"game_type = \"{levelGameType}\"");
                     if (!firstLevelRulesAdded)
